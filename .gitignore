@@ -1,3 +1,7 @@
+.idea
+.DS_STORE
+.swarm
+
 # Logs
 logs
 *.log
