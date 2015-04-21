@@ -2,7 +2,6 @@
 
 var Model = require('swarm').Model;
 
-// Our key class: a mouse pointer :)
 module.exports = Model.extend('Switch', {
     defaults: {
         name: '',

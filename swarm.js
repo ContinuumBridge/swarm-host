@@ -15,6 +15,8 @@ var compression = require('compression');
 var Swarm = require('swarm');
 var EinarosWSStream = require('swarm/lib/EinarosWSStream');
 
+var QueryHost = require('./queryHost');
+
 var args = process.argv.slice(2);
 var argv = require('minimist')(args, {
     alias: {
@@ -44,7 +46,8 @@ app.use(express.static('.'));
 var fileStorage = new Swarm.FileStorage(argv.store);
 
 // create Swarm Host
-var swarmHost = new Swarm.Host('swarm~nodejs', 0, fileStorage);
+//var swarmHost = new Swarm.Host('swarm~nodejs', 0, fileStorage);
+var swarmHost = new QueryHost('swarm~nodejs', 0, fileStorage);
 Swarm.env.localhost = swarmHost;
 
 //app.swarmHost.accept(new EinarosWSStream(ws), { delay: 50 });
@@ -121,6 +124,7 @@ modelPathList.split(/[:;,]/g).forEach(function (modelPath) {
     modelPath = path.resolve(modelPath);
     console.log('scanning',modelPath);
     var modelClasses = fs.readdirSync(modelPath), modelFile;
+    //console.log('modelClasses ', modelClasses );
     while (modelFile = modelClasses.pop()) {
         if (!/^\w+\.js$/.test(modelFile)) { continue; }
         var modpath = path.join(modelPath, modelFile);

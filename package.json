@@ -12,9 +12,11 @@
     "compression": "^1.4.1",
     "continuumbridge": "0.0.7",
     "express": "^4.12.0",
+    "jrpc2": "^0.4.2",
     "minimist": "^1.1.0",
+    "netstring": "^0.3.0",
     "react": "^0.12.2",
-    "swarm": "git+ssh://git@github.com/remaininlight/swarm.git",
+    "swarm": "git+ssh://git@github.com/remaininlight/swarm.git#dev",
     "underscore": "^1.8.2",
     "ws": "^0.7.1"
   }

@@ -1,6 +1,8 @@
 
+var repl = require('repl');
 var _ = require('underscore');
-var swarmHost = require('./swarm').host;
+var RPC = require('./rpc/server');
+swarmHost = require('./swarm').host;
 var StreamManager = require('./streams/manager');
 
 var Switch = require('./models/switch');
@@ -8,7 +10,7 @@ var Switch = require('./models/switch');
 CB = require('continuumbridge');
 logger = CB.logger;
 
-var client = new CB.Client({
+client = new CB.Client({
     key: '33d347b7Cq1RBN9mtkyGk6ovD9nf/FmZsBsMi4VPWvUmP8Z/ksqoxW0FWJbObwG8',
     cbAPI: 'http://dev.continuumbridge.com:8000/api/client/v1/',
     cbSocket: 'http://dev.continuumbridge.com'
@@ -16,9 +18,23 @@ var client = new CB.Client({
 
 var streamManager = new StreamManager(client, swarmHost);
 
-client.on('message', function(message) {
+Spec = require('swarm').Spec;
+var rpc = new RPC(swarmHost);
+rpc.listen('/var/tmp/swarm_socket_rpc');
 
+client.on('message', function(message) {
     streamManager.deliver(message);
+});
+
+client.on('connect', function() {
+    logger.log('Client connected');
+});
+
+repl.start({
+    prompt: "node via stdin> ",
+    input: process.stdin,
+    output: process.stdout,
+    useGlobal: true
 });
 
 /*
@@ -35,10 +51,7 @@ genericSwitch.on('.init', function() {
     });
 });
 */
-
-client.on('connect', function() {
-    logger.log('Client connected');
-    /*
+ /*
     var testMessage = new CB.Message({
         body:
         {
@@ -57,6 +70,3 @@ client.on('connect', function() {
         }
     }), 2000);
     */
-});
-
-
