@@ -2,7 +2,7 @@
 var repl = require('repl');
 var _ = require('underscore');
 var RPC = require('./rpc/server');
-swarmHost = require('./swarm').host;
+swarmHost = require('./swarm/swarm').host;
 var StreamManager = require('./streams/manager');
 
 var Switch = require('./models/switch');
@@ -11,6 +11,12 @@ CB = require('continuumbridge');
 logger = CB.logger;
 
 client = new CB.Client({
+    /*
+    key: '255a3f81gPVwTy2qHcRrJHQ+yLnYvEFdOvNq3cKGVXNa80WEVRzdbsyaf+RT7dJV',
+    cbAPI: 'http://dev.continuumbridge.com:8000/api/bridge/v1/',
+    cbSocket: 'http://dev.continuumbridge.com',
+    bridge: true
+    */
     key: '33d347b7Cq1RBN9mtkyGk6ovD9nf/FmZsBsMi4VPWvUmP8Z/ksqoxW0FWJbObwG8',
     cbAPI: 'http://dev.continuumbridge.com:8000/api/client/v1/',
     cbSocket: 'http://dev.continuumbridge.com'
@@ -20,7 +26,8 @@ var streamManager = new StreamManager(client, swarmHost);
 
 Spec = require('swarm').Spec;
 var rpc = new RPC(swarmHost);
-rpc.listen('/var/tmp/swarm_socket_rpc');
+swarmHost.app = rpc;
+rpc.listen('/var/tmp/swarm_socket');
 
 client.on('message', function(message) {
     streamManager.deliver(message);

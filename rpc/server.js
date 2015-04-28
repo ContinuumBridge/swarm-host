@@ -25,9 +25,18 @@ var RPC = function(swarmHost) {
             console.log('ping pinged');
             return "pong";
         },
-        register: function(type, schema) {
-            host.registerType(type, schema);
-            return "yes";
+        registerSchema: function(type, schema) {
+            host.registerSchema(type, schema);
+            return "yes Schema";
+        },
+        subscribeModel: function(type, attributes) {
+            return host.subscribeModel(type, attributes);
+        },
+        updateModel: function(type, attributes) {
+            return host.updateModel(type, attributes);
+        },
+        onTraitChange: function(type, attributes) {
+            return host.onTraitChange(type, attributes);
         },
         get: function(type, attributes, options) {
 
@@ -55,12 +64,11 @@ RPC.prototype.listen = function(socketPath) {
 
     var self = this;
 
-    fs.unlink(socketPath, function () {
+    var rpcSocketPath = socketPath + "_rpc";
+    console.log('rpcSocketPath ', rpcSocketPath );
+    fs.unlink(rpcSocketPath, function () {
         // This server listens on a Unix socket at /var/run/mysocket
         var unixServer = net.createServer(function (client) {
-
-            //console.log('new client', client);
-            self.clients.push(client);
 
             client.on('data', function (buffer) {
                 //client.end();
@@ -87,13 +95,52 @@ RPC.prototype.listen = function(socketPath) {
                 if (error) {
                     console.log('close error', error);
                 }
+            });
+        });
+        unixServer.listen(rpcSocketPath);
+    });
+
+    fs.unlink(socketPath, function () {
+        // This server listens on a Unix socket at /var/run/mysocket
+        var unixServer = net.createServer(function (client) {
+
+            //console.log('new client', client);
+            self.clients.push(client);
+
+            client.on('data', function (buffer) {
+                //client.end();
+                var dataString = buffer.toString();
+                console.log('received data', dataString);
+                /*
+                var dataJSON = dataString.slice(0, -1).split(/:(.+)?/)[1];
+                var data = JSON.parse(dataJSON);
+                */
+
+            });
+
+            client.on('close', function(error) {
+                if (error) {
+                    console.log('close error', error);
+                }
                 var clients = self.clients;
                 clients.splice(clients.indexOf(client), 1);
             });
         });
         unixServer.listen(socketPath);
     });
+
 }
+
+RPC.prototype.write = function(message) {
+
+    console.log('write message', message);
+    var buffer = netstring.nsWrite(JSON.stringify(message));
+    if (buffer) {
+        _.each(this.clients, function(client) {
+            client.write(buffer);
+        });
+    }
+};
 
 module.exports = RPC;
 
